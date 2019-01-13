@@ -5,25 +5,27 @@ fn react(mut content: String) -> String {
     while last_len != content.len() {
         //  Update the length for next iteration
         last_len = content.len();
-        let bytes = content.as_bytes();
 
-        //  Loop through content to find a combination
-        for index in 0..content.len() - 1 {
-            //  Look for two chars where one is uppercase and one is lowercase
-            if bytes[index] as u8 == bytes[index + 1] as u8 ^ 32 {
-                //  Cut out the 2 chars that combined
-                let mut prefix = bytes[0..index].to_vec();
-                prefix.extend(&bytes[index + 2..]);
+        (b'a'..=b'z').for_each(|ch: u8| {
+            let mut pair = String::new();
+            let mut rev_pair = String::new();
 
-                //  Re-assign content
-                content = String::from_utf8(prefix).unwrap();
-                break;
-            }
-        }
+            //  Create "xX" type string
+            pair.push(ch as char);
+            pair.push((ch ^ 32) as char);
+
+            //  Create "Xx" type string
+            rev_pair.push((ch ^ 32) as char);
+            rev_pair.push(ch as char);
+
+            content = content.replace(&pair, "")
+                .replace(&rev_pair, "");
+        });
     }
 
     content
 }
+
 pub fn part_1() -> Result<usize, std::io::Error> {
     let content = std::fs::read_to_string("input/5.txt")?;
     Ok(react(content).len())
